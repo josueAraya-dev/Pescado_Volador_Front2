@@ -81,12 +81,30 @@ function iniciar() {
     })
   }
 
-  function abrirDetalles(idCompra) {
+  // Los nombres de producto vienen de GET /purchases/{id}/items (el listado no los incluye).
+  async function abrirDetalles(idCompra) {
     const compra = comprasPorId.get(String(idCompra))
     if (!compra) return
-    const items = compra.purchaseItems ?? []
 
     tituloDialogo.textContent = `Compra ${compra.id_purchase}`
+    contenidoDialogo.replaceChildren(
+      nodo('p', { texto: `Proveedor: ${compra.id_supplier}` }),
+      nodo('p', { clase: 'badges' }, [
+        nodo('span', { clase: claseEstadoCompra(compra.purchase_status), texto: compra.purchase_status }),
+        nodo('span', { clase: 'price', texto: colones(compra.purchase_total) }),
+      ]),
+      nodo('p', { role: 'status', clase: 'ayuda', texto: 'Cargando productos…' }),
+    )
+    dialogo.showModal()
+
+    const respuesta = await llamada(
+      () => api.listarRecurso(`/purchases/${encodeURIComponent(compra.id_purchase)}/items`, { per_page: 50 }),
+      (error) =>
+        contenidoDialogo.append(nodo('p', { clase: 'error', role: 'alert', texto: error.message })),
+    )
+    if (!respuesta) return
+
+    const items = respuesta.data
     contenidoDialogo.replaceChildren(
       nodo('p', { texto: `Proveedor: ${compra.id_supplier}` }),
       nodo('p', { clase: 'badges' }, [
@@ -97,7 +115,6 @@ function iniciar() {
         ? tablaDetalles(items)
         : nodo('p', { clase: 'ayuda', texto: 'Esta compra no tiene detalles.' }),
     )
-    dialogo.showModal()
   }
 
   zonaContenido.addEventListener('click', (evento) => {

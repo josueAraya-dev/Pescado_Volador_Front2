@@ -55,7 +55,9 @@ Contraseña `password` para todos.
 | `src/formularios.js` | Generador de formularios a partir de una lista de campos, con validación y errores por campo. |
 | `src/crud.js` | Tabla con alta, edición y baja según los permisos del rol. |
 | `src/formularioProducto.js` | Campos y validaciones de producto (espejo de las reglas del backend). |
-| `src/main.js` | Catálogo y ventas (incluye pagos y eliminación de ventas). |
+| `src/productos.js` | Página de productos: búsqueda, código de barras, detalle, edición, alta, baja y resumen (en diálogos). |
+| `src/ventas.js` | Página de ventas: venta con varias líneas de producto, edición de cabecera e historial. |
+| `src/main.js` | Inicio de sesión (`login.html`). |
 | `src/recepcion.js`, `src/compras.js`, `src/proveedores.js`, `src/catalogos.js`, `src/clientes.js`, `src/movimientos.js` | Una página por módulo. |
 | `styles.css` | Identidad visual: tokens en `:root` y componentes. |
 | `docs/identidad-visual.md` | Guía de la paleta, tipografía y componentes. |
@@ -64,8 +66,8 @@ Contraseña `password` para todos.
 
 | Página | Permiso para verla | Qué permite |
 |---|---|---|
-| `index.html` (Catálogo) | `view products` | Buscar por nombre o SKU, buscar por código de barras, ver detalle con código de barras, resumen de inventario. Con permisos: crear, editar y eliminar producto. |
-| `ventas.html` (Ventas) | `view sales` | Crear venta con productos, editar ventas, historial paginado. Con permisos: eliminar venta y registrar pagos. |
+| `index.html` (Productos) | `view products` | Buscar por nombre, SKU o código de barras; ver el detalle en una ventana emergente con su código de barras; resumen de inventario. Con permisos: crear, editar y eliminar producto. |
+| `ventas.html` (Ventas) | `view sales` | Crear una venta con una o varias líneas de producto (cantidad editable y total automático), editar sus datos e historial paginado. Con permisos: eliminar venta. |
 | `recepcion.html` (Recepción) | `receive purchases` | Buscar detalles pendientes por código de barras y recibirlos con la cantidad exacta. |
 | `compras.html` (Compras) | `view purchases` | Listado de compras de solo lectura. Los detalles se abren en una ventana emergente. |
 | `proveedores.html` (Proveedores) | `view suppliers` | Lista de proveedores. Con permisos: crear, editar y eliminar. |
@@ -82,14 +84,13 @@ Los permisos vienen del backend (`RolePermissionSeeder`) y se leen del token al 
 
 | Función | admin | cajero | bodeguero |
 |---|:---:|:---:|:---:|
-| Catálogo: ver, buscar, detalle, código de barras, resumen | ✅ | ✅ | ✅ |
+| Productos: ver, buscar, detalle, código de barras, resumen | ✅ | ✅ | ✅ |
 | Producto: crear | ✅ | — | — |
 | Producto: editar | ✅ | — | ✅ |
 | Producto: eliminar | ✅ | — | — |
 | Ventas: crear con productos | ✅ | ✅ | — |
 | Ventas: editar | ✅ | ✅ (solo las propias) | — |
 | Ventas: eliminar | ✅ | — | — |
-| Pagos: registrar | ✅ | — | — |
 | Recepción de compras | ✅ | — | ✅ |
 | Compras: ver | ✅ | — | ✅ |
 | Proveedores: ver | ✅ | — | ✅ |
@@ -107,13 +108,13 @@ Los permisos vienen del backend (`RolePermissionSeeder`) y se leen del token al 
 | Vista | Endpoints que consume |
 |---|---|
 | Login | `POST /login`, `POST /logout` |
-| Catálogo | `GET /products`, `GET /products/by-barcode`, `GET /products/{id}`, `GET /products/{id}/barcode`, `GET /products/inventory-summary`, `POST /products`, `PUT /products/{id}`, `DELETE /products/{id}`, `GET /categories`, `GET /brands`, `GET /units` |
-| Ventas | `GET /sales`, `POST /sales`, `PUT /sales/{id}`, `DELETE /sales/{id}`, `POST /sale-items`, `GET /customers`, `GET /products`, `POST /payments` |
+| Productos | `GET /products`, `GET /products/by-barcode`, `GET /products/{id}`, `GET /products/{id}/barcode`, `GET /products/inventory-summary`, `POST /products`, `PUT /products/{id}`, `DELETE /products/{id}`, `GET /categories`, `GET /brands`, `GET /units` |
+| Ventas | `GET /sales`, `POST /sales`, `PUT /sales/{id}`, `DELETE /sales/{id}`, `POST /sale-items` (una por cada producto), `GET /customers`, `GET /products?q=` |
 | Recepción | `GET /purchase-receipts?barcode=`, `POST /purchase-items/{id}/receive` |
-| Compras | `GET /purchases` |
+| Compras | `GET /purchases`, `GET /purchases/{id}/items` (nombres de producto en el detalle) |
 | Proveedores | `GET /suppliers`, `POST /suppliers`, `PUT /suppliers/{id}`, `DELETE /suppliers/{id}` |
 | Clientes | `GET /customers`, `POST /customers`, `PUT /customers/{id}`, `DELETE /customers/{id}` |
-| Movimientos | `GET /inventory-movements` |
+| Movimientos | `GET /inventory-movements` (la columna Fecha necesita que el backend envíe la fecha del movimiento) |
 | Catálogos | `GET/POST/PUT/DELETE /categories`, `/brands`, `/units` |
 
 ## Manejo de errores

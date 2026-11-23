@@ -85,7 +85,7 @@ function aplicarTema(tema) {
   if (boton) {
     const oscuro = tema === 'oscuro'
     boton.setAttribute('aria-pressed', String(oscuro))
-    boton.textContent = oscuro ? 'Modo claro' : 'Modo oscuro'
+    boton.textContent = oscuro ? '☀ Modo claro' : '☾ Modo oscuro'
   }
 }
 
@@ -97,6 +97,19 @@ function iniciarTema() {
 }
 
 iniciarTema()
+
+// Cierra el diálogo al hacer clic fuera de su caja (en el fondo oscuro).
+export function cerrarAlClicFuera(dialogo) {
+  dialogo.addEventListener('click', (evento) => {
+    const caja = dialogo.getBoundingClientRect()
+    const fuera =
+      evento.clientX < caja.left ||
+      evento.clientX > caja.right ||
+      evento.clientY < caja.top ||
+      evento.clientY > caja.bottom
+    if (fuera) dialogo.close()
+  })
+}
 
 export function configurarSalir() {
   document.querySelector('#btn-salir')?.addEventListener('click', async () => {

@@ -148,6 +148,7 @@ export function pintarDetalleProducto(producto, imagenBarras = null) {
     ['Estado', producto.esta_activo ? 'Activo' : 'Inactivo'],
   ]
 
+  // filter(Boolean): replaceChildren/append convierten null en el texto "null".
   return [
     nodo('h3', { texto: producto.nombre }),
     producto.descripcion ? nodo('p', { clase: 'ayuda', texto: producto.descripcion }) : null,
@@ -166,7 +167,7 @@ export function pintarDetalleProducto(producto, imagenBarras = null) {
           alt: `Código de barras ${producto.codigo_barras}`,
         })
       : null,
-  ]
+  ].filter(Boolean)
 }
 
 export function pintarResumenInventario(datos) {
