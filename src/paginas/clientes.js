@@ -1,11 +1,8 @@
-import { aplicarPermisos, configurarSalir, exigirPagina, exigirSesion } from './comun.js'
-import { montarCrud } from './crud.js'
+// Página de clientes (clientes.html). Lectura para el cajero; alta, cambio y baja para el admin.
+import { montarCrud } from '../componentes/crud.js'
+import { iniciarPagina } from '../nucleo/comun.js'
 
-function iniciar() {
-  if (!exigirPagina('view customers')) return
-  aplicarPermisos()
-  configurarSalir()
-
+iniciarPagina('view customers', () => {
   montarCrud({
     raiz: document.querySelector('#crud-clientes'),
     titulo: 'Clientes',
@@ -28,22 +25,25 @@ function iniciar() {
       { nombre: 'telephone_number', etiqueta: 'Teléfono', tipo: 'text', max: 20 },
     ],
     columnas: [
-      { etiqueta: 'Identificación', valor: (f) => f.id_customer },
-      { etiqueta: 'Nombre', valor: (f) => [f.first_name, f.second_name, f.last_name1, f.last_name2].filter(Boolean).join(' ') },
-      { etiqueta: 'Correo', valor: (f) => f.email },
-      { etiqueta: 'Teléfono', valor: (f) => f.telephone_number },
+      { etiqueta: 'Identificación', valor: (cliente) => cliente.id_customer },
+      {
+        etiqueta: 'Nombre',
+        valor: (cliente) => [cliente.first_name, cliente.second_name, cliente.last_name1, cliente.last_name2]
+          .filter(Boolean)
+          .join(' '),
+      },
+      { etiqueta: 'Correo', valor: (cliente) => cliente.email },
+      { etiqueta: 'Teléfono', valor: (cliente) => cliente.telephone_number },
     ],
-    idDe: (f) => f.id_customer,
-    valoresDe: (f) => ({
-      id_customer: f.id_customer,
-      first_name: f.first_name,
-      second_name: f.second_name,
-      last_name1: f.last_name1,
-      last_name2: f.last_name2,
-      email: f.email,
-      telephone_number: f.telephone_number,
+    idDe: (cliente) => cliente.id_customer,
+    valoresDe: (cliente) => ({
+      id_customer: cliente.id_customer,
+      first_name: cliente.first_name,
+      second_name: cliente.second_name,
+      last_name1: cliente.last_name1,
+      last_name2: cliente.last_name2,
+      email: cliente.email,
+      telephone_number: cliente.telephone_number,
     }),
   })
-}
-
-if (exigirSesion()) iniciar()
+})

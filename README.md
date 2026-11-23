@@ -47,18 +47,34 @@ Contraseña `password` para todos.
 
 ## Estructura
 
-| Archivo | Responsabilidad |
+El código JavaScript está en `src/`, organizado por responsabilidad:
+
+```
+src/
+├── nucleo/        Lo básico que usan todas las páginas
+│   ├── api.js          Cliente de la API (token, permisos y peticiones)
+│   ├── comun.js        Sesión, control de acceso por página y por sección, llamadas a la API
+│   └── tema.js         Botón de modo oscuro
+├── componentes/   Piezas reutilizables de la interfaz
+│   ├── vista.js        Tarjetas, tablas, detalle de producto y listas con carga, vacío y error
+│   ├── formularios.js  Formularios generados a partir de una lista de campos, con validación
+│   ├── crud.js         Tabla con alta, edición y baja según los permisos del rol
+│   └── dialogos.js     Botones que despliegan formularios y diálogos que se cierran al hacer clic fuera
+├── reglas/
+│   └── producto.js     Campos y validaciones de producto (espejo de las reglas del backend)
+└── paginas/       Una carpeta de código por pantalla
+    ├── login.js                    Inicio de sesión
+    ├── productos.js                Listado, búsqueda, código de barras y resumen
+    ├── productos-detalle.js        Ver, editar y eliminar un producto
+    ├── productos-alta.js           Crear un producto
+    ├── ventas.js                   Crear y editar ventas
+    ├── ventas-lineas.js            Productos de una venta: agregar, cantidades y totales
+    ├── ventas-historial.js         Historial de ventas
+    ├── recepcion.js, compras.js, proveedores.js, catalogos.js, clientes.js, movimientos.js
+```
+
+| Otros archivos | Responsabilidad |
 |---|---|
-| `src/api.js` | Cliente de la API (`ClienteApi`): token, permisos (`puede()`), consultas y manejo de errores (`ErrorApi`). |
-| `src/comun.js` | Sesión, control de acceso por página y por sección, y utilidades compartidas. |
-| `src/views.js` | Render de tarjetas, tablas, detalle de producto y listas con estados de carga, vacío y error. |
-| `src/formularios.js` | Generador de formularios a partir de una lista de campos, con validación y errores por campo. |
-| `src/crud.js` | Tabla con alta, edición y baja según los permisos del rol. |
-| `src/formularioProducto.js` | Campos y validaciones de producto (espejo de las reglas del backend). |
-| `src/productos.js` | Página de productos: búsqueda, código de barras, detalle, edición, alta, baja y resumen (en diálogos). |
-| `src/ventas.js` | Página de ventas: venta con varias líneas de producto, edición de cabecera e historial. |
-| `src/main.js` | Inicio de sesión (`login.html`). |
-| `src/recepcion.js`, `src/compras.js`, `src/proveedores.js`, `src/catalogos.js`, `src/clientes.js`, `src/movimientos.js` | Una página por módulo. |
 | `styles.css` | Identidad visual: tokens en `:root` y componentes. |
 | `docs/identidad-visual.md` | Guía de la paleta, tipografía y componentes. |
 
@@ -85,19 +101,19 @@ Los permisos vienen del backend (`RolePermissionSeeder`) y se leen del token al 
 | Función | admin | cajero | bodeguero |
 |---|:---:|:---:|:---:|
 | Productos: ver, buscar, detalle, código de barras, resumen | ✅ | ✅ | ✅ |
-| Producto: crear | ✅ | — | — |
-| Producto: editar | ✅ | — | ✅ |
-| Producto: eliminar | ✅ | — | — |
-| Ventas: crear con productos | ✅ | ✅ | — |
-| Ventas: editar | ✅ | ✅ (solo las propias) | — |
-| Ventas: eliminar | ✅ | — | — |
+| Producto: crear | â | â | â |
+| Producto: editar | â | â | â |
+| Producto: eliminar | â | â | â |
+| Ventas: crear con productos | â | â | â |
+| Ventas: editar | â | â (solo las propias) | â |
+| Ventas: eliminar | â | â | â |
 | Recepción de compras | ✅ | — | ✅ |
-| Compras: ver | ✅ | — | ✅ |
-| Proveedores: ver | ✅ | — | ✅ |
-| Proveedores: crear, editar, eliminar | ✅ | — | ❗ (ver nota) |
-| Clientes: ver | ✅ | ✅ | — |
-| Clientes: crear, editar, eliminar | ✅ | — | — |
-| Movimientos de inventario | ✅ | — | — |
+| Compras: ver | â | â | â |
+| Proveedores: ver | â | â | â |
+| Proveedores: crear, editar, eliminar | â | â | â (ver nota) |
+| Clientes: ver | â | â | â |
+| Clientes: crear, editar, eliminar | â | â | â |
+| Movimientos de inventario | â | â | â |
 | Catálogos: ver | ✅ | — | ✅ (solo lectura) |
 | Catálogos: crear, editar, eliminar | ✅ | — | — |
 

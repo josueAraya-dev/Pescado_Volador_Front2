@@ -330,16 +330,6 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
   border-color: var(--c-primario-oscuro);
 }
 
-.btn-acento {
-  background: var(--c-acento);
-  border-color: var(--c-acento);
-  color: var(--c-tinta);
-}
-.btn-acento:hover:not(:disabled) {
-  background: var(--c-acento-oscuro);
-  border-color: var(--c-acento-oscuro);
-}
-
 .btn-peligro {
   color: var(--c-error);
   border-color: var(--c-error);
@@ -536,14 +526,6 @@ textarea { min-height: 6rem; resize: vertical; }
 }
 
 .card-pie .ayuda { margin: 0; }
-
-.producto-imagen {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: contain;
-  border-radius: var(--radio-sm);
-  background: var(--c-superficie-alt);
-}
 
 /* 10. Detalle de producto y código de barras */
 .detalle-producto {

@@ -77,7 +77,7 @@ Todos los botones tienen altura mínima de 2.75 rem y foco visible (contorno nar
 - Cada campo tiene `<label>` visible, nunca solo `placeholder`.
 - Los errores van en un párrafo `.ayuda` con `data-error="nombre-del-campo"`; el campo recibe `aria-invalid="true"`.
 - Los campos obligatorios usan `required`.
-- Los formularios generados con `src/formularios.js` siguen este patrón automáticamente.
+- Los formularios generados con `src/componentes/formularios.js` siguen este patrón automáticamente.
 
 ### Tablas
 

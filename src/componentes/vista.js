@@ -1,29 +1,47 @@
+// Funciones que dibujan la interfaz: crean elementos HTML a partir de los datos de la API.
+
 const formatoColones = new Intl.NumberFormat('es-CR', {
   style: 'currency',
   currency: 'CRC',
   maximumFractionDigits: 0,
 })
 
+const formatoFecha = new Intl.DateTimeFormat('es-CR', { dateStyle: 'medium', timeZone: 'UTC' })
+
 export function colones(valor) {
   return formatoColones.format(Number(valor) || 0)
 }
 
-export function nodo(tag, opciones = {}, ...hijos) {
+// Crea un elemento. Atributos especiales: `texto` (contenido), `clase` (className),
+// y `onClick`/`onChange`/... (escuchadores). Los hijos null o false se ignoran.
+export function nodo(tag, atributos = {}, ...hijos) {
   const elemento = document.createElement(tag)
-  Object.entries(opciones).forEach(([clave, valor]) => {
-    if (clave === 'texto') elemento.textContent = valor
-    else if (clave === 'clase') elemento.className = valor
-    else if (clave.startsWith('on') && typeof valor === 'function') {
-      elemento.addEventListener(clave.slice(2).toLowerCase(), valor)
+
+  Object.entries(atributos).forEach(([nombre, valor]) => {
+    if (nombre === 'texto') {
+      elemento.textContent = valor
+    } else if (nombre === 'clase') {
+      elemento.className = valor
+    } else if (nombre.startsWith('on') && typeof valor === 'function') {
+      elemento.addEventListener(nombre.slice(2).toLowerCase(), valor)
     } else if (valor !== undefined && valor !== null && valor !== false) {
-      elemento.setAttribute(clave, valor === true ? '' : valor)
+      elemento.setAttribute(nombre, valor === true ? '' : valor)
     }
   })
+
   hijos.flat().forEach((hijo) => {
     if (hijo) elemento.append(hijo)
   })
   return elemento
 }
+
+// Muestra un mensaje de estado en un elemento: en rojo si es error, en gris si es informativo.
+export function mostrarTexto(elemento, texto, esError = false) {
+  elemento.className = esError ? 'error' : 'ayuda'
+  elemento.textContent = texto
+}
+
+// ----- Listas con estados: carga, vacío, error, datos y paginación -----
 
 export function renderizarLista({
   zonaEstado,
@@ -42,9 +60,7 @@ export function renderizarLista({
   if (zonaPaginacion) zonaPaginacion.hidden = seccion.estado !== 'datos'
 
   if (seccion.estado === 'carga') {
-    zonaEstado.append(
-      nodo('p', { clase: '', role: 'status', texto: `Cargando ${etiqueta}…` }),
-    )
+    zonaEstado.append(nodo('p', { role: 'status', texto: `Cargando ${etiqueta}…` }))
     return
   }
 
@@ -76,17 +92,15 @@ export function renderizarLista({
     return
   }
 
-  zonaEstado.append(
-    nodo('p', { role: 'status', texto: `${seccion.datos.length} ${etiqueta} en esta página.` }),
-  )
+  zonaEstado.append(nodo('p', { role: 'status', texto: `${seccion.datos.length} ${etiqueta} en esta página.` }))
   zonaContenido.append(...pintar(seccion.datos))
 
   if (zonaPaginacion && seccion.meta && onPagina) {
-    zonaPaginacion.append(paginacion(seccion.meta, onPagina))
+    zonaPaginacion.append(crearPaginacion(seccion.meta, onPagina))
   }
 }
 
-function paginacion(meta, onPagina) {
+function crearPaginacion(meta, onPagina) {
   const pagina = meta.current_page
   const ultima = meta.last_page
 
@@ -107,7 +121,9 @@ function paginacion(meta, onPagina) {
   ])
 }
 
-function badgeStock(producto) {
+// ----- Productos -----
+
+function insigniaStock(producto) {
   const stock = Number(producto.cantidad_stock ?? 0)
   const minimo = Number(producto.stock_minimo ?? 0)
 
@@ -119,15 +135,14 @@ function badgeStock(producto) {
   return nodo('span', { clase: 'badge badge-ok', texto: '✓ En stock' })
 }
 
-export function pintarProductos(datos) {
-  return datos.map((producto) =>
+// Tarjetas del listado de productos.
+export function pintarProductos(productos) {
+  return productos.map((producto) =>
     nodo('article', { clase: 'card' }, [
       nodo('h3', { texto: producto.nombre }),
       nodo('p', { texto: `${producto.sku} · ${colones(producto.precio)}` }),
-      producto.descripcion
-        ? nodo('p', { clase: 'ayuda', texto: producto.descripcion })
-        : null,
-      nodo('p', { clase: 'badges' }, [badgeStock(producto)]),
+      producto.descripcion ? nodo('p', { clase: 'ayuda', texto: producto.descripcion }) : null,
+      nodo('p', { clase: 'badges' }, [insigniaStock(producto)]),
       nodo('p', { clase: 'card-pie' }, [
         nodo('button', { type: 'button', texto: 'Ver detalle', 'data-detalle': producto.id }),
       ]),
@@ -135,6 +150,7 @@ export function pintarProductos(datos) {
   )
 }
 
+// Contenido del diálogo de detalle: datos, descripción y, si existe, la imagen del código de barras.
 export function pintarDetalleProducto(producto, imagenBarras = null) {
   const filas = [
     ['SKU', producto.sku],
@@ -148,17 +164,14 @@ export function pintarDetalleProducto(producto, imagenBarras = null) {
     ['Estado', producto.esta_activo ? 'Activo' : 'Inactivo'],
   ]
 
-  // filter(Boolean): replaceChildren/append convierten null en el texto "null".
+  // filter(Boolean): replaceChildren y append convierten null en el texto "null".
   return [
     nodo('h3', { texto: producto.nombre }),
     producto.descripcion ? nodo('p', { clase: 'ayuda', texto: producto.descripcion }) : null,
     nodo(
       'dl',
       { clase: 'detalle-producto' },
-      filas.flatMap(([etiqueta, valor]) => [
-        nodo('dt', { texto: etiqueta }),
-        nodo('dd', { texto: valor }),
-      ]),
+      filas.flatMap(([etiqueta, valor]) => [nodo('dt', { texto: etiqueta }), nodo('dd', { texto: valor })]),
     ),
     imagenBarras
       ? nodo('img', {
@@ -170,7 +183,8 @@ export function pintarDetalleProducto(producto, imagenBarras = null) {
   ].filter(Boolean)
 }
 
-export function pintarResumenInventario(datos) {
+// Tabla del resumen de inventario por categoría.
+export function pintarResumenInventario(filas) {
   return [
     nodo('table', {}, [
       nodo('caption', { texto: 'Totales por categoría' }),
@@ -188,7 +202,7 @@ export function pintarResumenInventario(datos) {
       nodo(
         'tbody',
         {},
-        datos.map((fila) =>
+        filas.map((fila) =>
           nodo('tr', {}, [
             nodo('th', { scope: 'row', texto: fila.category_name }),
             nodo('td', { texto: String(fila.total_products) }),
@@ -201,7 +215,7 @@ export function pintarResumenInventario(datos) {
   ]
 }
 
-const formatoFecha = new Intl.DateTimeFormat('es-CR', { dateStyle: 'medium', timeZone: 'UTC' })
+// ----- Ventas -----
 
 function fechaVenta(valor) {
   const iso = String(valor ?? '').slice(0, 10)
@@ -209,7 +223,7 @@ function fechaVenta(valor) {
   return Number.isNaN(fecha.getTime()) ? 'Sin fecha' : formatoFecha.format(fecha)
 }
 
-function badgeEstadoVenta(estado) {
+function insigniaEstadoVenta(estado) {
   const texto = String(estado ?? '').trim() || 'sin estado'
   const valor = texto.toLowerCase()
   let clase = 'badge badge-neutro'
@@ -219,106 +233,23 @@ function badgeEstadoVenta(estado) {
   return nodo('span', { clase, texto })
 }
 
-export function pintarVentas(datos, nombreCliente, { editable = true, eliminable = false, pagable = false } = {}) {
-  return datos.map((venta) =>
+// Tarjetas del historial de ventas. Los botones dependen de los permisos que recibe.
+export function pintarVentas(ventas, nombreCliente, { editable = true, eliminable = false } = {}) {
+  return ventas.map((venta) =>
     nodo('article', { clase: 'card' }, [
       nodo('h3', { texto: `Venta #${venta.id}` }),
       nodo('p', { texto: nombreCliente(venta) }),
       nodo('p', { clase: 'price', texto: colones(venta.total) }),
-      nodo('p', { clase: 'badges' }, [badgeEstadoVenta(venta.status)]),
+      nodo('p', { clase: 'badges' }, [insigniaEstadoVenta(venta.status)]),
       nodo('p', { clase: 'ayuda', texto: `Fecha: ${fechaVenta(venta.sale_date)}` }),
       nodo('p', { clase: 'card-pie' }, [
         editable
-          ? nodo('button', {
-              type: 'button',
-              clase: 'btn-primario',
-              texto: 'Editar',
-              'data-editar': venta.id,
-            })
+          ? nodo('button', { type: 'button', clase: 'btn-primario', texto: 'Editar', 'data-editar': venta.id })
           : nodo('span', { clase: 'ayuda', texto: 'Solo lectura' }),
-        pagable ? nodo('button', { type: 'button', texto: 'Registrar pago', 'data-pagar': venta.id }) : null,
-        eliminable ? nodo('button', { type: 'button', texto: 'Eliminar', 'data-eliminar': venta.id }) : null,
+        eliminable
+          ? nodo('button', { type: 'button', texto: 'Eliminar', 'data-eliminar': venta.id })
+          : null,
       ]),
     ]),
   )
-}
-
-export function renderFormularioVenta(venta, form) {
-  if (!form) return
-
-  Object.entries(venta.valores).forEach(([campo, valor]) => {
-    const control = form.elements.namedItem(campo)
-    if (!control || control === document.activeElement) return
-    control.value = valor ?? ''
-  })
-
-  const nombres = ['id_customer', 'sale_date', 'total', 'tax_amount', 'discount', 'status']
-  nombres.forEach((campo) => {
-    const control = form.elements.namedItem(campo)
-    const zonaError = form.querySelector(`[data-error="${campo}"]`)
-    if (!control) return
-
-    const mensaje = venta.errores[campo]?.[0] ?? ''
-    control.setAttribute('aria-invalid', mensaje ? 'true' : 'false')
-    if (zonaError) {
-      zonaError.textContent = mensaje
-      zonaError.className = mensaje ? 'error' : 'ayuda'
-    }
-  })
-
-  const generales = Object.entries(venta.errores)
-    .filter(([campo]) => !nombres.includes(campo))
-    .filter(([, mensajes]) => Array.isArray(mensajes))
-    .flatMap(([, mensajes]) => mensajes)
-
-  const estado = form.querySelector('#estado-venta')
-  if (estado) {
-    if (generales.length) {
-      estado.textContent = generales.join(' ')
-      estado.style.color = 'var(--danger)'
-    } else if (venta.mensaje) {
-      estado.textContent = venta.mensaje
-      estado.style.color = 'var(--success)'
-    } else if (venta.enviando) {
-      estado.textContent = 'Guardando venta…'
-      estado.style.color = ''
-    } else {
-      estado.textContent = ''
-    }
-  }
-
-  const boton = form.querySelector('[type="submit"]')
-  if (boton) boton.disabled = venta.enviando
-
-  const titulo = document.querySelector('#t-venta')
-  if (titulo) {
-    titulo.textContent = venta.modo === 'editar' ? `Editar venta #${venta.edicionId}` : 'Nueva venta'
-  }
-
-  const cancelar = form.querySelector('#btn-cancelar-edicion')
-  if (cancelar) cancelar.hidden = venta.modo !== 'editar'
-}
-
-export function renderClientes(select, clientes) {
-  if (!select) return
-
-  const firma = clientes.datos.map((c) => c.id_customer).join(',')
-  if (select.dataset.firma === firma) return
-  select.dataset.firma = firma
-
-  const seleccionado = select.value
-  select.replaceChildren(
-    nodo('option', { value: '', texto: 'Seleccione…' }),
-    ...clientes.datos.map((cliente) =>
-      nodo('option', {
-        value: cliente.id_customer,
-        texto: `${cliente.first_name} ${cliente.last_name1}`.trim() || cliente.email,
-      }),
-    ),
-  )
-
-  if (clientes.estado === 'error') {
-    select.append(nodo('option', { value: '', texto: 'No se pudieron cargar los clientes' }))
-  }
-  select.value = seleccionado || ''
 }

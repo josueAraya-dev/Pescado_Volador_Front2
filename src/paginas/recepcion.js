@@ -1,33 +1,32 @@
-import { ErrorApi } from './api.js'
-import { api, aplicarPermisos, configurarSalir, exigirPagina, exigirSesion, llamada } from './comun.js'
-import { nodo } from './views.js'
+// Página de recepción de compras (recepcion.html).
+// Flujo: 1) escanear el código del producto, 2) elegir el detalle pendiente, 3) confirmar la cantidad.
+import { api, esErrorDeCampos, iniciarPagina, llamada } from '../nucleo/comun.js'
+import { nodo } from '../componentes/vista.js'
 
-function iniciar() {
-  if (!exigirPagina('receive purchases')) return
-  aplicarPermisos()
-  configurarSalir()
-  if (!api.puede('receive purchases')) return
+function avisoDeError(texto) {
+  return nodo('p', { clase: 'error', role: 'alert', texto })
+}
 
-  const formBuscar = document.querySelector('#buscar-form')
+iniciarPagina('receive purchases', () => {
+  const formularioBuscar = document.querySelector('#buscar-form')
   const campoCodigo = document.querySelector('#codigo')
   const zonaBuscar = document.querySelector('#buscar-estado')
   const zonaPendientes = document.querySelector('#pendientes')
   const seccionConfirmar = document.querySelector('#confirmar')
   const zonaDetalle = document.querySelector('#confirmar-detalle')
-  const formRecibir = document.querySelector('#recibir-form')
+  const formularioRecibir = document.querySelector('#recibir-form')
   const estado = document.querySelector('#estado-recepcion')
-  const botonRecibir = formRecibir.querySelector('[type="submit"]')
+  const botonRecibir = formularioRecibir.querySelector('[type="submit"]')
 
   let codigoBuscado = ''
   let pendientes = []
   let seleccionado = null
 
-  const aviso = (texto) => nodo('p', { clase: 'error', role: 'alert', texto })
-
+  // Muestra u oculta el error de cada campo del formulario de recepción.
   function marcarErrores(errores = {}) {
     ;['barcode', 'quantity'].forEach((campo) => {
-      const control = formRecibir.elements.namedItem(campo)
-      const zona = formRecibir.querySelector(`[data-error="${campo}"]`)
+      const control = formularioRecibir.elements.namedItem(campo)
+      const zona = formularioRecibir.querySelector(`[data-error="${campo}"]`)
       const mensaje = errores[campo]?.[0] ?? ''
       control.setAttribute('aria-invalid', mensaje ? 'true' : 'false')
       zona.textContent = mensaje
@@ -35,9 +34,9 @@ function iniciar() {
     })
   }
 
-  function pintarPendientes(datos) {
+  function pintarPendientes(detalles) {
     zonaPendientes.replaceChildren(
-      ...datos.map((detalle) =>
+      ...detalles.map((detalle) =>
         nodo('article', { clase: 'card' }, [
           nodo('h3', { texto: detalle.nombre }),
           nodo('p', { texto: `Compra ${detalle.id_purchase} · Detalle #${detalle.id}` }),
@@ -55,6 +54,7 @@ function iniciar() {
     )
   }
 
+  // Paso 1: busca los detalles pendientes del producto con ese código.
   async function buscar(codigo) {
     codigoBuscado = codigo
     seleccionado = null
@@ -66,11 +66,7 @@ function iniciar() {
       () => api.listarRecepcionesPendientes(codigo),
       (error) =>
         zonaBuscar.replaceChildren(
-          aviso(
-            error.status === 404
-              ? `No existe un producto con el código “${codigo}”.`
-              : error.message,
-          ),
+          avisoDeError(error.status === 404 ? `No existe un producto con el código “${codigo}”.` : error.message),
         ),
     )
     if (!respuesta) return
@@ -92,6 +88,7 @@ function iniciar() {
     pintarPendientes(pendientes)
   }
 
+  // Paso 2: el usuario elige un detalle y el formulario se llena con sus datos.
   function seleccionar(id) {
     seleccionado = pendientes.find((detalle) => detalle.id === id) ?? null
     if (!seleccionado) return
@@ -101,8 +98,8 @@ function iniciar() {
       nodo('p', { texto: `Compra ${seleccionado.id_purchase} · Detalle #${seleccionado.id}` }),
       nodo('p', { texto: `Cantidad esperada: ${seleccionado.quantity}` }),
     )
-    formRecibir.elements.namedItem('barcode').value = codigoBuscado
-    formRecibir.elements.namedItem('quantity').value = String(seleccionado.quantity)
+    formularioRecibir.elements.namedItem('barcode').value = codigoBuscado
+    formularioRecibir.elements.namedItem('quantity').value = String(seleccionado.quantity)
     marcarErrores({})
     estado.textContent = ''
     estado.style.color = ''
@@ -110,41 +107,29 @@ function iniciar() {
     seccionConfirmar.focus()
   }
 
-  formBuscar.addEventListener('submit', (evento) => {
-    evento.preventDefault()
-    const codigo = campoCodigo.value.trim()
-    if (!codigo) {
-      zonaBuscar.replaceChildren(aviso('Escriba o escanee un código de barras.'))
-      return
-    }
-    buscar(codigo)
-  })
-
-  zonaPendientes.addEventListener('click', (evento) => {
-    const boton = evento.target.closest('[data-recibir]')
-    if (boton) seleccionar(Number(boton.dataset.recibir))
-  })
-
-  document.querySelector('#btn-cancelar-recepcion').addEventListener('click', () => {
-    seccionConfirmar.hidden = true
-    seleccionado = null
-  })
-
-  formRecibir.addEventListener('submit', async (evento) => {
-    evento.preventDefault()
-    if (!seleccionado) return
-
-    const detalle = seleccionado
-    const barcode = formRecibir.elements.namedItem('barcode').value.trim()
-    const quantity = Number(formRecibir.elements.namedItem('quantity').value)
-
+  // Revisa los datos antes de enviarlos. Devuelve los errores encontrados.
+  function validarRecepcion(barcode, quantity, detalle) {
     const errores = {}
     if (!barcode) errores.barcode = ['Escriba el código de barras del producto.']
+
     if (!Number.isInteger(quantity) || quantity < 1) {
       errores.quantity = ['Ingrese una cantidad entera mayor que cero.']
     } else if (quantity !== Number(detalle.quantity)) {
       errores.quantity = [`Debe coincidir exactamente con la cantidad del detalle (${detalle.quantity}).`]
     }
+    return errores
+  }
+
+  // Paso 3: confirma la recepción en la API.
+  async function confirmarRecepcion(evento) {
+    evento.preventDefault()
+    if (!seleccionado) return
+
+    const detalle = seleccionado
+    const barcode = formularioRecibir.elements.namedItem('barcode').value.trim()
+    const quantity = Number(formularioRecibir.elements.namedItem('quantity').value)
+
+    const errores = validarRecepcion(barcode, quantity, detalle)
     marcarErrores(errores)
     if (Object.keys(errores).length) return
 
@@ -155,11 +140,11 @@ function iniciar() {
     const respuesta = await llamada(
       () => api.recibirDetalle(detalle.id, { barcode, quantity }),
       (error) => {
-        if (error instanceof ErrorApi && error.status === 422 && Object.keys(error.errors).length) {
+        if (esErrorDeCampos(error)) {
           marcarErrores(error.errors)
           estado.textContent = ''
         } else {
-          estado.style.color = 'var(--danger)'
+          estado.style.color = 'var(--c-error)'
           estado.textContent = error.message
         }
       },
@@ -176,7 +161,27 @@ function iniciar() {
         texto: `Recibidos ${quantity} × ${detalle.nombre} (compra ${detalle.id_purchase}).`,
       }),
     )
-  })
-}
+  }
 
-if (exigirSesion()) iniciar()
+  formularioBuscar.addEventListener('submit', (evento) => {
+    evento.preventDefault()
+    const codigo = campoCodigo.value.trim()
+    if (!codigo) {
+      zonaBuscar.replaceChildren(avisoDeError('Escriba o escanee un código de barras.'))
+      return
+    }
+    buscar(codigo)
+  })
+
+  zonaPendientes.addEventListener('click', (evento) => {
+    const boton = evento.target.closest('[data-recibir]')
+    if (boton) seleccionar(Number(boton.dataset.recibir))
+  })
+
+  document.querySelector('#btn-cancelar-recepcion').addEventListener('click', () => {
+    seccionConfirmar.hidden = true
+    seleccionado = null
+  })
+
+  formularioRecibir.addEventListener('submit', confirmarRecepcion)
+})

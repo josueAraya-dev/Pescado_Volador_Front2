@@ -1,11 +1,10 @@
-import { aplicarPermisos, configurarSalir, exigirPagina, exigirSesion } from './comun.js'
-import { montarCrud } from './crud.js'
+// Página de catálogos (catalogos.html): categorías, marcas y unidades de medida.
+import { montarCrud } from '../componentes/crud.js'
+import { iniciarPagina } from '../nucleo/comun.js'
 
-function iniciar() {
-  if (!exigirPagina('view categories')) return
-  aplicarPermisos()
-  configurarSalir()
-
+// Cada catálogo tiene la misma forma: lista, alta, cambio y baja.
+// Los nombres de campo y de columna son los que devuelve y recibe el backend.
+iniciarPagina('view categories', () => {
   montarCrud({
     raiz: document.querySelector('#crud-categorias'),
     titulo: 'Categorías',
@@ -23,11 +22,11 @@ function iniciar() {
       { nombre: 'description', etiqueta: 'Descripción', tipo: 'textarea', requerido: true, max: 200 },
     ],
     columnas: [
-      { etiqueta: 'Nombre', valor: (f) => f.Nombre },
-      { etiqueta: 'Descripción', valor: (f) => f.Descripcion },
+      { etiqueta: 'Nombre', valor: (fila) => fila.Nombre },
+      { etiqueta: 'Descripción', valor: (fila) => fila.Descripcion },
     ],
-    idDe: (f) => f['ID Categoria'],
-    valoresDe: (f) => ({ category_name: f.Nombre, description: f.Descripcion }),
+    idDe: (fila) => fila['ID Categoria'],
+    valoresDe: (fila) => ({ category_name: fila.Nombre, description: fila.Descripcion }),
   })
 
   montarCrud({
@@ -43,9 +42,9 @@ function iniciar() {
       eliminar: 'delete brands',
     },
     campos: [{ nombre: 'brand_name', etiqueta: 'Nombre', tipo: 'text', requerido: true, max: 200 }],
-    columnas: [{ etiqueta: 'Nombre', valor: (f) => f.Nombre }],
-    idDe: (f) => f['ID Marca'],
-    valoresDe: (f) => ({ brand_name: f.Nombre }),
+    columnas: [{ etiqueta: 'Nombre', valor: (fila) => fila.Nombre }],
+    idDe: (fila) => fila['ID Marca'],
+    valoresDe: (fila) => ({ brand_name: fila.Nombre }),
   })
 
   montarCrud({
@@ -61,10 +60,8 @@ function iniciar() {
       eliminar: 'delete units',
     },
     campos: [{ nombre: 'unit_name', etiqueta: 'Nombre', tipo: 'text', requerido: true, max: 200 }],
-    columnas: [{ etiqueta: 'Nombre', valor: (f) => f.Nombre }],
-    idDe: (f) => f['ID Unidad de Medida'],
-    valoresDe: (f) => ({ unit_name: f.Nombre }),
+    columnas: [{ etiqueta: 'Nombre', valor: (fila) => fila.Nombre }],
+    idDe: (fila) => fila['ID Unidad de Medida'],
+    valoresDe: (fila) => ({ unit_name: fila.Nombre }),
   })
-}
-
-if (exigirSesion()) iniciar()
+})
