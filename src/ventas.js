@@ -25,10 +25,6 @@ function iniciar() {
   if (!exigirPagina('view sales')) return
   aplicarPermisos()
   configurarSalir()
-  document.querySelector('#btn-expirar')?.addEventListener('click', () => {
-    api.limpiarSesion()
-    location.replace('login.html?motivo=expirada')
-  })
 
   const $ = (selector) => document.querySelector(selector)
   const form = $('#venta-form')

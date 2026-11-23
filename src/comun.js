@@ -85,7 +85,8 @@ function aplicarTema(tema) {
   if (boton) {
     const oscuro = tema === 'oscuro'
     boton.setAttribute('aria-pressed', String(oscuro))
-    boton.textContent = oscuro ? '☀ Modo claro' : '☾ Modo oscuro'
+    boton.textContent = oscuro ? '☀' : '☾'
+    boton.setAttribute('aria-label', oscuro ? 'Modo claro' : 'Modo oscuro')
   }
 }
 

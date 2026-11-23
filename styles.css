@@ -255,7 +255,17 @@ header.sitio .acciones button:hover:not(:disabled) { background: rgba(255, 255, 
 /* Botón de modo oscuro: destacado y con icono. */
 /* Modo oscuro: contorno. Cerrar sesión: sólido naranja (la acción principal).
    Simular expiración: enlace discreto, sin borde. */
-header.sitio #btn-tema { border-color: rgba(255, 255, 255, 0.7); }
+header.sitio #btn-tema {
+  border-color: rgba(255, 255, 255, 0.7);
+  width: var(--alto-header-boton);
+  min-width: var(--alto-header-boton);
+  padding: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 
 header.sitio #btn-salir {
   background: var(--c-acento);
@@ -264,14 +274,6 @@ header.sitio #btn-salir {
 }
 header.sitio #btn-salir:hover:not(:disabled) { background: var(--c-acento-oscuro); }
 
-header.sitio #btn-expirar {
-  border-color: transparent;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.85);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  font-weight: 500;
-}
 
 /* Texto solo para lectores de pantalla. */
 .sr-only {
