@@ -1,0 +1,599 @@
+/*
+  Identidad visual: Pescado Volador.
+  Tokens en :root; los componentes solo usan estas variables.
+  Guía completa en docs/identidad-visual.md.
+*/
+
+/* 1. Tokens */
+:root {
+  /* Color: primario (petróleo), acento (naranja), tinta y superficies */
+  --c-primario: #0B5563;
+  --c-primario-oscuro: #083F4A;
+  --c-primario-suave: #E2F0F2;
+  --c-primario-texto: #0B5563;
+  --c-acento: #F29E4C;
+  --c-acento-oscuro: #D9822B;
+  --c-tinta: #0F1B22;
+  --c-tinta-suave: #3E4C57;
+  --c-borde: #7A8794;
+  --c-borde-suave: #D7DEE4;
+  --c-fondo: #F4F7F8;
+  --c-superficie: #FFFFFF;
+  --c-superficie-alt: #EEF3F5;
+
+  /* Color de estado */
+  --c-exito: #17663D;
+  --c-exito-suave: #DDF3E6;
+  --c-error: #B42318;
+  --c-error-suave: #FDECEA;
+  --c-aviso: #8A5A00;
+  --c-aviso-suave: #FFF3D6;
+
+  /* Tipografía */
+  --fuente-titulos: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --fuente-texto: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Espaciado (escala de 4 px) */
+  --espacio-1: 0.25rem;
+  --espacio-2: 0.5rem;
+  --espacio-3: 0.75rem;
+  --espacio-4: 1rem;
+  --espacio-5: 1.5rem;
+  --espacio-6: 2rem;
+
+  /* Radios y sombras */
+  --radio-sm: 0.5rem;
+  --radio: 0.75rem;
+  --radio-lg: 1rem;
+  --sombra-sm: 0 1px 2px rgba(15, 27, 34, 0.06);
+  --sombra-md: 0 6px 18px rgba(15, 27, 34, 0.1);
+
+  /* Medidas */
+  --alto-control: 2.75rem;
+  --ancho-contenido: 80rem;
+  --foco: 3px solid var(--c-acento);
+}
+
+/* Modo oscuro: mismos nombres de token, valores distintos. */
+:root[data-tema="oscuro"] {
+  color-scheme: dark;
+  --c-primario: #1F7A8A;
+  --c-primario-oscuro: #17616E;
+  --c-primario-suave: #15313A;
+  --c-primario-texto: #7FD3E0;
+  --c-acento: #F5A962;
+  --c-acento-oscuro: #F29E4C;
+  --c-tinta: #E8EEF2;
+  --c-tinta-suave: #B3C0CA;
+  --c-borde: #8D9BA7;
+  --c-borde-suave: #2C3B45;
+  --c-fondo: #0E1519;
+  --c-superficie: #17222A;
+  --c-superficie-alt: #1F2D37;
+  --c-exito: #6FD39A;
+  --c-exito-suave: #173A29;
+  --c-error: #FF8A80;
+  --c-error-suave: #3D1E1B;
+  --c-aviso: #FFC861;
+  --c-aviso-suave: #3A2F12;
+}
+
+/* 2. Base */
+*, *::before, *::after { box-sizing: border-box; }
+
+[hidden] { display: none !important; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--fuente-texto);
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--c-tinta);
+  background: var(--c-fondo);
+}
+
+img, svg, video { max-width: 100%; height: auto; }
+
+h1, h2, h3 {
+  font-family: var(--fuente-titulos);
+  color: var(--c-tinta);
+  line-height: 1.25;
+}
+h1 { font-size: 1.875rem; margin: var(--espacio-5) 0 var(--espacio-2); }
+h2 { font-size: 1.375rem; margin: var(--espacio-4) 0 var(--espacio-2); }
+h3 { font-size: 1.125rem; margin: var(--espacio-2) 0 var(--espacio-1); overflow-wrap: anywhere; }
+
+p, li { max-width: 75ch; margin: 0 0 var(--espacio-2); }
+
+a { color: var(--c-primario-texto); }
+
+code { overflow-wrap: anywhere; }
+
+/* 3. Contenedor y disposición */
+.container {
+  --pad: 1rem;
+  width: 100%;
+  max-width: var(--ancho-contenido);
+  margin-inline: auto;
+  padding-inline: var(--pad);
+  background: var(--c-superficie);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--sombra-sm);
+
+  @media (width >= 36rem) { --pad: 1.25rem; }
+  @media (width >= 64rem) { --pad: 2rem; }
+}
+
+body > .container > main { flex: 1; padding-block: var(--espacio-4) var(--espacio-6); }
+
+.layout {
+  display: grid;
+  gap: var(--espacio-5);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Títulos de página y avisos ocupan todo el ancho, sin importar la columna. */
+.layout > :not(section) { grid-column: 1 / -1; }
+.layout > section { min-width: 0; }
+.ancho-completo { grid-column: 1 / -1; }
+
+.layout-dos {
+  @media (width >= 64rem) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+    align-items: start;
+  }
+}
+
+/* 4. Cabecera y navegación */
+header.sitio {
+  background: var(--c-primario);
+  color: #FFFFFF;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--sombra-sm);
+}
+
+/* El contenedor del encabezado no debe heredar el fondo blanco de .container. */
+header.sitio .header-inner {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-2) var(--espacio-4);
+  max-width: var(--ancho-contenido);
+  margin-inline: auto;
+  padding: var(--espacio-2) var(--pad);
+  background: transparent;
+  box-shadow: none;
+  flex: none;
+}
+
+/* Las opciones ocupan el espacio disponible; si no caben, se desplazan dentro del menú. */
+header.sitio .nav {
+  display: flex;
+  flex: 1 1 100%;
+  min-width: 0;
+  flex-wrap: nowrap;
+  gap: var(--espacio-1);
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+header.sitio .nav { flex: 1 1 100%; }
+
+header.sitio .nav a {
+  display: inline-flex;
+  white-space: nowrap;
+  flex: none;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: var(--espacio-1) var(--espacio-3);
+  border-radius: var(--radio-sm);
+  color: #FFFFFF;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  border-bottom: 3px solid transparent;
+}
+
+header.sitio .nav a:hover { background: rgba(255, 255, 255, 0.12); }
+
+header.sitio .nav a[aria-current="page"] {
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.16);
+  border-bottom-color: var(--c-acento);
+}
+
+header.sitio .acciones {
+  order: -1;
+  margin: 0;
+  width: 100%;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+header.sitio .acciones button {
+  background: transparent;
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+header.sitio .acciones button:hover { background: rgba(255, 255, 255, 0.14); }
+
+.skip {
+  position: absolute;
+  left: -100vw;
+}
+.skip:focus {
+  left: var(--espacio-4);
+  top: var(--espacio-4);
+  background: var(--c-superficie);
+  color: var(--c-tinta);
+  padding: var(--espacio-2) var(--espacio-4);
+  z-index: 200;
+  border-radius: var(--radio-sm);
+}
+
+/* 5. Botones */
+button, .btn {
+  min-height: var(--alto-control);
+  min-width: var(--alto-control);
+  padding: var(--espacio-2) var(--espacio-4);
+  border-radius: var(--radio-sm);
+  border: 1px solid var(--c-borde);
+  background: var(--c-superficie);
+  color: var(--c-tinta);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+button:hover:not(:disabled) { background: var(--c-superficie-alt); }
+button:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.btn-primario {
+  background: var(--c-primario);
+  border-color: var(--c-primario-texto);
+  color: #FFFFFF;
+}
+.btn-primario:hover:not(:disabled) {
+  background: var(--c-primario-oscuro);
+  border-color: var(--c-primario-oscuro);
+}
+
+.btn-acento {
+  background: var(--c-acento);
+  border-color: var(--c-acento);
+  color: var(--c-tinta);
+}
+.btn-acento:hover:not(:disabled) {
+  background: var(--c-acento-oscuro);
+  border-color: var(--c-acento-oscuro);
+}
+
+.btn-peligro {
+  color: var(--c-error);
+  border-color: var(--c-error);
+  background: var(--c-superficie);
+}
+.btn-peligro:hover:not(:disabled) { background: var(--c-error-suave); }
+
+:focus-visible {
+  outline: var(--foco);
+  outline-offset: 2px;
+}
+
+@media (any-pointer: coarse) {
+  button, .btn { min-height: 3rem; }
+}
+
+/* 6. Formularios */
+form {
+  display: grid;
+  gap: var(--espacio-3);
+}
+
+form fieldset {
+  border: 1px solid var(--c-borde-suave);
+  border-radius: var(--radio);
+  padding: var(--espacio-4);
+  display: grid;
+  gap: var(--espacio-2);
+  margin: 0;
+  min-width: 0;
+}
+
+form legend {
+  padding-inline: var(--espacio-2);
+  font-family: var(--fuente-titulos);
+  font-weight: 700;
+  color: var(--c-primario-texto);
+}
+
+label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--c-tinta);
+}
+
+input, select, textarea {
+  width: 100%;
+  min-height: var(--alto-control);
+  font: inherit;
+  padding: var(--espacio-2) var(--espacio-3);
+  border: 1px solid var(--c-borde);
+  border-radius: var(--radio-sm);
+  background: var(--c-superficie);
+  color: var(--c-tinta);
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: var(--foco);
+  outline-offset: 0;
+  border-color: var(--c-primario-texto);
+}
+
+input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="true"] {
+  border: 2px solid var(--c-error);
+}
+
+input[type="checkbox"] {
+  width: 1.25rem;
+  min-height: 1.25rem;
+  accent-color: var(--c-primario-texto);
+}
+
+textarea { min-height: 6rem; resize: vertical; }
+
+/* 7. Texto de apoyo, avisos y estados */
+.ayuda {
+  font-size: 0.875rem;
+  color: var(--c-tinta-suave);
+  margin: var(--espacio-1) 0 0;
+}
+
+.error {
+  font-size: 0.9rem;
+  color: var(--c-error);
+  background: var(--c-error-suave);
+  padding: var(--espacio-2) var(--espacio-3);
+  border-radius: var(--radio-sm);
+  border-left: 4px solid var(--c-error);
+}
+
+.price {
+  font-family: var(--fuente-titulos);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--c-primario-texto);
+}
+
+/* 8. Insignias de estado */
+.badges, .acciones, .fila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-2);
+}
+
+.badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: var(--espacio-1) var(--espacio-3);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+.badge-ok { background: var(--c-exito-suave); color: var(--c-exito); }
+.badge-bajo { background: var(--c-aviso-suave); color: var(--c-aviso); }
+.badge-error { background: var(--c-error-suave); color: var(--c-error); }
+.badge-neutro { background: var(--c-superficie-alt); color: var(--c-tinta-suave); }
+
+/* 9. Tarjetas y cuadrículas */
+.grid-productos,
+.grid-ventas {
+  display: grid;
+  gap: var(--espacio-4);
+  grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr));
+  min-width: 0;
+}
+
+.grid-productos > *,
+.grid-ventas > * { min-width: 0; }
+
+.card {
+  background: var(--c-superficie);
+  border: 1px solid var(--c-borde-suave);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra-sm);
+  padding: var(--espacio-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  min-width: 0;
+}
+
+.card h3 { margin: 0; }
+.card p { margin: 0; overflow-wrap: anywhere; }
+
+.card-pie {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+  align-items: center;
+}
+
+.card-pie .ayuda { margin: 0; }
+
+.producto-imagen {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+  border-radius: var(--radio-sm);
+  background: var(--c-superficie-alt);
+}
+
+/* 10. Detalle de producto y código de barras */
+.detalle-producto {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--espacio-1) var(--espacio-4);
+  margin: 0;
+}
+
+@media (width >= 36rem) {
+  .detalle-producto { grid-template-columns: max-content minmax(0, 1fr); }
+}
+
+.detalle-producto dt { font-weight: 600; color: var(--c-tinta-suave); }
+.detalle-producto dd { margin: 0 0 var(--espacio-2); overflow-wrap: anywhere; }
+
+.codigo-barras {
+  max-width: 100%;
+  height: auto;
+  padding: var(--espacio-2);
+  background: #FFFFFF;
+  border: 1px solid var(--c-borde-suave);
+  border-radius: var(--radio-sm);
+}
+
+#detalle:focus-visible { outline: var(--foco); outline-offset: 4px; }
+
+/* 11. Tablas */
+.tabla-scroll { overflow-x: auto; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--c-superficie);
+  font-size: 0.9rem;
+}
+
+caption {
+  text-align: left;
+  font-family: var(--fuente-titulos);
+  font-weight: 700;
+  padding-bottom: var(--espacio-2);
+  color: var(--c-primario-texto);
+}
+
+th, td {
+  text-align: left;
+  padding: var(--espacio-2) var(--espacio-3);
+  border-bottom: 1px solid var(--c-borde-suave);
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+thead th {
+  background: var(--c-superficie-alt);
+  color: var(--c-tinta);
+  font-weight: 600;
+}
+
+tbody th[scope="row"] { font-weight: 600; }
+
+tbody tr:hover { background: var(--c-primario-suave); }
+
+/* 12. Diálogo modal (detalles de compra) */
+dialog {
+  width: min(44rem, calc(100% - 2rem));
+  max-height: calc(100dvh - 2rem);
+  overflow: auto;
+  border: 1px solid var(--c-borde-suave);
+  border-radius: var(--radio-lg);
+  padding: var(--espacio-5);
+  background: var(--c-superficie);
+  color: var(--c-tinta);
+  box-shadow: var(--sombra-md);
+}
+
+dialog::backdrop { background: rgba(15, 27, 34, 0.55); }
+
+dialog .cabecera-dialogo {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--espacio-3);
+  margin-bottom: var(--espacio-3);
+}
+
+dialog .cabecera-dialogo h2 { margin: 0; }
+
+/* 13. Secciones desplegables (acciones de alta) */
+.seccion-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-3);
+}
+
+.seccion-cabecera h2 { margin: 0; }
+
+details {
+  border: 1px solid var(--c-borde-suave);
+  border-radius: var(--radio-sm);
+  padding: var(--espacio-2) var(--espacio-3);
+  background: var(--c-superficie);
+}
+
+details summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--c-primario-texto);
+  min-height: var(--alto-control);
+  display: flex;
+  align-items: center;
+}
+
+details[open] summary { margin-bottom: var(--espacio-2); }
+
+/* 14. Paginación */
+.fila { justify-content: space-between; }
+
+/* 15. Pie de página */
+footer {
+  border-top: 1px solid var(--c-borde-suave);
+  padding-block: var(--espacio-4);
+  color: var(--c-tinta-suave);
+}
+
+footer .contacto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  font-style: normal;
+  font-size: 0.9rem;
+}
+
+@media (width >= 48rem) {
+  footer .contacto { flex-direction: row; gap: var(--espacio-6); }
+}
+
+footer .contacto p { margin: 0; }
+footer .contacto a { color: var(--c-primario-texto); }
+
+/* 16. Impresión */
+@media print {
+  body { background: #FFFFFF; color: #000000; }
+  header.sitio, .skip, button, .btn, dialog { display: none; }
+  .container { max-width: none; box-shadow: none; }
+  .card { break-inside: avoid; }
+}
