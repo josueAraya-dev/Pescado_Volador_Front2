@@ -59,10 +59,11 @@ export function crearDetalleProducto({ onCambio, mostrarAccion }) {
     if (productoActual !== producto) return
 
     const sinImagen = producto.codigo_barras && !imagen
-    zonaDetalle.replaceChildren(
-      ...pintarDetalleProducto(producto, imagen),
-      sinImagen ? nodo('p', { clase: 'ayuda', texto: 'No se pudo generar la imagen del código de barras.' }) : null,
-    )
+    const avisoSinImagen = sinImagen
+      ? nodo('p', { clase: 'ayuda', texto: 'No se pudo generar la imagen del código de barras.' })
+      : null
+    // filter(Boolean): un null dentro de replaceChildren se escribiría como el texto "null".
+    zonaDetalle.replaceChildren(...[...pintarDetalleProducto(producto, imagen), avisoSinImagen].filter(Boolean))
   }
 
   // Abre el diálogo y carga el producto por su ID.

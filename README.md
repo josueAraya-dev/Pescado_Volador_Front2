@@ -145,7 +145,26 @@ Los permisos vienen del backend (`RolePermissionSeeder`) y se leen del token al 
 
 La paleta, la tipografía, los tokens y los componentes están documentados en [`docs/identidad-visual.md`](docs/identidad-visual.md). Para cambiar la marca, basta con editar las variables de `:root` en `styles.css`.
 
+## Cómo agregar una pantalla nueva
+
+1. Crea el HTML en la raíz del front, copiando el encabezado de otra página (la marca, el menú y los botones). Marca con `data-permiso="..."` cada enlace y cada sección que dependa de un permiso.
+2. Crea el módulo en `src/paginas/`, usando `iniciarPagina` de `src/nucleo/comun.js`. Esa función revisa la sesión, el permiso de la página, el tema, los permisos visibles y el botón de salir; tu código va dentro de `preparar`:
+
+```js
+import { iniciarPagina } from '../nucleo/comun.js'
+
+iniciarPagina('view categories', () => {
+  // Aquí va el código propio de la página.
+})
+```
+
+3. Agrega la página a `PAGINAS` en `src/nucleo/comun.js` (así el menú y las redirecciones la conocen) y a `rollupOptions.input` en `vite.config.js`.
+4. Si la pantalla es una tabla con alta, edición y baja, usa `montarCrud` de `src/componentes/crud.js`. Si necesita un formulario, usa `construirFormulario` de `src/componentes/formularios.js`.
+
 ## Pendientes
 
-- Modo oscuro (los tokens ya están preparados).
-- Revisar en el navegador cada pantalla con cada rol antes de la entrega.
+- **Pruebas de flujos:** falta probar en el navegador, con la API real y cada rol, los flujos de crear una venta con varios productos, recibir una compra, editar y eliminar productos y editar ventas.
+- **Edición de líneas de venta:** hoy solo se edita la cabecera de una venta. Las líneas se pueden editar desde la API, pero aún no en la pantalla.
+- **Compras y permisos:** un usuario que no es admin solo ve las compras que él registró. Es una regla del backend.
+- **Fecha de movimientos:** la columna Fecha de Movimientos muestra un guion hasta que el backend incluya la fecha (`created_at`) en `InventoryMovementResource`.
+- **Permiso de bodeguero para proveedores:** el seeder del backend todavía le da `create suppliers`. Hasta que se quite, la pantalla de proveedores le muestra el formulario de alta.

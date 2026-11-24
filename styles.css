@@ -646,6 +646,11 @@ details[open] summary { margin-bottom: var(--espacio-2); }
 /* 14. Ventas: líneas de producto y totales */
 .lineas-venta { width: 100%; }
 
+/* Cifras y botones no se parten en varias líneas; el nombre del producto sí puede hacerlo. */
+.lineas-venta th,
+.lineas-venta td { white-space: nowrap; }
+.lineas-venta td:first-child { white-space: normal; }
+
 .lineas-venta input[type="number"] { width: 6rem; min-height: 2.25rem; padding: var(--espacio-1) var(--espacio-2); }
 
 .resumen-venta {
